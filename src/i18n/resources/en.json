@@ -441,6 +441,16 @@
       },
       "name": "Disable Autoplay"
     },
+    "pause-confirmation": {
+      "description": "Shows confirmation dialog before pausing playback",
+      "name": "Pause Confirmation",
+      "message": "DO YOU WANT TO PAUSE PLAYBACK?",
+      "yes": "YES",
+      "cancel": "CANCEL",
+      "menu": {
+        "disable-player-events": "Disable Player Events"
+      }
+    },
     "discord": {
       "backend": {
         "already-connected": "Attempted to connect with active connection",

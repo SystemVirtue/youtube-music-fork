@@ -16,6 +16,12 @@ export type PictureInPicturePluginConfig = {
   'pip-size': [number, number];
   'isInPiP': boolean;
   'useNativePiP': boolean;
+  'fullscreenEnabled': boolean;
+  'selectedDisplay': number;
+  'overlayText': string;
+  'overlayPosition': 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+  'overlayFontSize': number;
+  'overlayOpacity': number;
 };
 
 export default createPlugin({
@@ -32,6 +38,12 @@ export default createPlugin({
     'pip-size': [450, 275],
     'isInPiP': false,
     'useNativePiP': true,
+    'fullscreenEnabled': false,
+    'selectedDisplay': 0,
+    'overlayText': 'Now Playing',
+    'overlayPosition': 'bottom-left',
+    'overlayFontSize': 24,
+    'overlayOpacity': 0.8,
   } as PictureInPicturePluginConfig,
   stylesheets: [style],
   menu: onMenu,

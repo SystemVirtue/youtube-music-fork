@@ -129,6 +129,45 @@ export const onPlayerApiReady = async (
     }
   });
 
+  // Handle new IPC messages for fullscreen and overlay functionality
+  ipc.on('pip:toggle-fullscreen-mode', () => {
+    ipc.send('pip:toggle-fullscreen-mode');
+  });
+
+  ipc.on('pip:configure-overlay', () => {
+    ipc.send('pip:configure-overlay');
+  });
+
+  ipc.on('pip:set-display', (displayId: number) => {
+    ipc.send('pip:set-display', displayId);
+  });
+
+  // Add API for menu to access display information
+  if (typeof window !== 'undefined') {
+    (window as any).electronAPI = {
+      invoke: async (channel: string, ...args: any[]) => {
+        // Use the existing ipc.invoke method if available
+        if (ipc.invoke) {
+          return await ipc.invoke(channel, ...args);
+        }
+        
+        // Fallback: send and wait for response
+        return new Promise((resolve) => {
+          const listener = (data: any) => {
+            resolve(data);
+            ipc.removeAllListeners(`${channel}-response`);
+          };
+          
+          ipc.on(`${channel}-response`, listener);
+          ipc.send(channel, ...args);
+        });
+      },
+      saveOverlayConfig: (config: any) => {
+        ipc.send('pip:save-overlay-config', config);
+      }
+    };
+  }
+
   getPlayMinimizeButton()?.addEventListener('click', pipClickEventListener);
 
   const pipButtonContainer = document.createElement('div');

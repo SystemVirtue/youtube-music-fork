@@ -1,5 +1,5 @@
 appId: com.github.th-ch.youtube-music
-productName: YouTube Music
+productName: DJAMMS_v1.0
 files:
   - '!*'
   - dist
@@ -19,7 +19,6 @@ mac:
     - target: dmg
       arch:
         - x64
-        - arm64
   icon: assets/generated/icons/mac/icon.icns
   compression: maximum
 win:

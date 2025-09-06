@@ -85,5 +85,95 @@ export const onMenu = async ({
         setConfig({ useNativePiP: item.checked });
       },
     },
+    {
+      type: 'separator',
+    },
+    {
+      label: 'Fullscreen Player',
+      type: 'checkbox',
+      checked: config.fullscreenEnabled,
+      click(item) {
+        setConfig({ fullscreenEnabled: item.checked });
+        // Send IPC message to toggle fullscreen mode
+        window.webContents.send('pip:toggle-fullscreen-mode');
+      },
+    },
+    {
+      label: 'Select Display',
+      async click() {
+        // Request displays from main process
+        try {
+          const displays = await window.webContents.executeJavaScript(`
+            new Promise((resolve) => {
+              if (window.electronAPI && window.electronAPI.invoke) {
+                window.electronAPI.invoke('pip:get-displays').then(resolve);
+              } else {
+                // Fallback: prompt user for display number
+                resolve([
+                  { id: 0, label: 'Display 1 (Primary)' },
+                  { id: 1, label: 'Display 2 (Secondary)' }
+                ]);
+              }
+            })
+          `);
+
+          let displayOptions = 'Available displays:\n\n';
+          displays.forEach((display: any) => {
+            displayOptions += `${display.id}: ${display.label}\n`;
+          });
+
+          const output = await prompt(
+            {
+              title: 'Select Display',
+              label: `${displayOptions}\nEnter display number:`,
+              type: 'input',
+              inputAttrs: { type: 'number', min: '0', max: displays.length.toString() },
+              value: config.selectedDisplay.toString(),
+              ...promptOptions(),
+            },
+            window,
+          );
+
+          if (output !== null && output !== undefined) {
+            const displayIndex = parseInt(output);
+            if (!isNaN(displayIndex) && displayIndex >= 0 && displayIndex < displays.length) {
+              setConfig({ selectedDisplay: displayIndex });
+              // Send IPC message to update display
+              window.webContents.send('pip:set-display', displayIndex);
+            }
+          }
+        } catch (error) {
+          console.error('Failed to get displays:', error);
+          
+          // Fallback prompt
+          const output = await prompt(
+            {
+              title: 'Select Display',
+              label: 'Enter display number (0 for primary, 1+ for secondary):',
+              type: 'input',
+              inputAttrs: { type: 'number', min: '0', max: '10' },
+              value: config.selectedDisplay.toString(),
+              ...promptOptions(),
+            },
+            window,
+          );
+
+          if (output !== null && output !== undefined) {
+            const displayIndex = parseInt(output);
+            if (!isNaN(displayIndex) && displayIndex >= 0) {
+              setConfig({ selectedDisplay: displayIndex });
+              window.webContents.send('pip:set-display', displayIndex);
+            }
+          }
+        }
+      },
+    },
+    {
+      label: 'Configure Overlay',
+      click() {
+        // Send IPC message to open overlay configuration
+        window.webContents.send('pip:configure-overlay');
+      },
+    },
   ];
 };
